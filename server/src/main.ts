@@ -1,7 +1,10 @@
 import { buildApp } from './app.js'
 import { env } from './config/env.js'
+import { closeDatabase, verifyDatabaseConnection } from './db/connection.js'
 
 async function start() {
+  await verifyDatabaseConnection()
+
   const app = await buildApp()
 
   try {
@@ -14,6 +17,7 @@ async function start() {
   const shutdown = async (signal: string) => {
     app.log.info(`Received ${signal}, shutting down gracefully`)
     await app.close()
+    await closeDatabase()
     process.exit(0)
   }
 
