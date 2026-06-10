@@ -9,7 +9,9 @@
     "build": "tsc",
     "start": "node --env-file=.env dist/main.js",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs migrate"
   },
   "engines": {
     "node": ">=20.18.0"

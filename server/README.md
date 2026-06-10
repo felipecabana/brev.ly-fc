@@ -23,3 +23,5 @@ npm install
 | `npm run start` | Executa build de produção |
 | `npm run lint` | ESLint (zero warnings) |
 | `npm run typecheck` | Verificação de tipos sem emitir arquivos |
+| `npm run db:generate` | Gera migrations a partir do schema Drizzle |
+| `npm run db:migrate` | Aplica migrations pendentes no PostgreSQL |
