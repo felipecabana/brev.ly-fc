@@ -1,0 +1,48 @@
+# Dependências
+node_modules/
+
+# Build / output
+dist/
+build/
+out/
+.vite/
+*.tsbuildinfo
+
+# Testes e cobertura
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Ambiente — nunca versionar credenciais
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs e editores
+.idea/
+*.swp
+*.swo
+*~
+
+# ESLint / Prettier cache
+.eslintcache
+.prettiercache
+
+# Docker (artefatos locais, não a imagem)
+docker-compose.override.yml
+
+# Drizzle (cache local de introspect)
+.drizzle/
