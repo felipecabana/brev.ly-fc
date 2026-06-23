@@ -1,19 +1,46 @@
+import { lazy, Suspense, type ReactNode } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
-import { HomePage } from './pages/home-page'
-import { NotFoundPage } from './pages/not-found-page'
-import { RedirectPage } from './pages/redirect-page'
+import { Spinner } from './components/ui/spinner'
+
+const HomePage = lazy(() =>
+  import('./pages/home-page').then((module) => ({ default: module.HomePage })),
+)
+const RedirectPage = lazy(() =>
+  import('./pages/redirect-page').then((module) => ({
+    default: module.RedirectPage,
+  })),
+)
+const NotFoundPage = lazy(() =>
+  import('./pages/not-found-page').then((module) => ({
+    default: module.NotFoundPage,
+  })),
+)
+
+function withSuspense(element: ReactNode) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-200">
+          <Spinner label="Carregando página" />
+        </div>
+      }
+    >
+      {element}
+    </Suspense>
+  )
+}
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: withSuspense(<HomePage />),
   },
   {
     path: '/:shortUrl',
-    element: <RedirectPage />,
+    element: withSuspense(<RedirectPage />),
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: withSuspense(<NotFoundPage />),
   },
 ])

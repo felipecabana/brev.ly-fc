@@ -40,7 +40,9 @@ docker run -p 3333:3333 \
   brevly-server
 ```
 
-Passe as variáveis de ambiente via `-e` ou `--env-file` (o `.env` local não entra na imagem).
+Passe as variáveis de ambiente via `-e` ou `--env-file` (o `.env` local não entra na imagem). Se o PostgreSQL estiver no host, use `host.docker.internal` no `DATABASE_URL` (Windows/macOS).
+
+Resultados da validação local: [DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md).
 
 ## Variáveis de ambiente
 
@@ -51,8 +53,18 @@ Copie `.env.example` para `.env` e preencha:
 | `PORT` | Porta do servidor (padrão: 3333) |
 | `HOST` | Host de bind |
 | `DATABASE_URL` | Connection string PostgreSQL |
-| `CORS_ORIGIN` | Origin permitida pelo CORS (mesmo valor do `VITE_FRONTEND_URL` do frontend) |
-| `CLOUDFLARE_*` | Credenciais para upload de CSV (exportação) |
+| `CORS_ORIGIN` | Origin permitida pelo CORS — deve ser igual ao `VITE_FRONTEND_URL` do frontend |
+| `CLOUDFLARE_ACCOUNT_ID` | ID da conta Cloudflare (exportação CSV) |
+| `CLOUDFLARE_ACCESS_KEY_ID` | Access key do R2 |
+| `CLOUDFLARE_SECRET_ACCESS_KEY` | Secret key do R2 |
+| `CLOUDFLARE_BUCKET` | Nome do bucket R2 |
+| `CLOUDFLARE_PUBLIC_URL` | URL pública base dos arquivos exportados |
+
+## Produção
+
+- `CORS_ORIGIN` deve corresponder **exatamente** ao `VITE_FRONTEND_URL` do frontend (protocolo, host e porta).
+- `CLOUDFLARE_*` são necessárias para a exportação CSV; sem elas, `POST /links/export` retorna erro 500.
+- No Docker, passe as variáveis via `-e` ou `--env-file` — o `.env` local não entra na imagem.
 
 ## API
 
