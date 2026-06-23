@@ -42,10 +42,11 @@ Copie `.env.example` para `.env` e preencha:
 - ESLint flat config alinhado ao backend
 - Camada de API: cliente Axios (`lib/axios.ts`), tipos compartilhados e funções HTTP para links (`api/`)
 - React Query configurado com defaults centralizados em `lib/query-client.ts`
-- Design system com tokens Tailwind, fontes Open Sans/Quicksand e componentes UI (`Button`, `Input`, `IconButton`, `Logo`)
+- Design system com tokens Tailwind, fontes Open Sans/Quicksand e componentes UI (`Button`, `Input`, `IconButton`, `Card`, `Spinner`, `Logo`); `Button` com estado de loading
 - Ícones via `@phosphor-icons/react`
-- Página inicial (`pages/home-page.tsx`): formulário de criação de link, listagem com estados de loading e vazio, e exclusão com confirmação
-- Página de redirecionamento (`pages/redirect-page.tsx`): busca o link pelo slug, incrementa acessos e redireciona para a URL original, com estado de carregamento; slug inválido ou inexistente exibe a página 404
+- Página inicial (`pages/home-page.tsx`): formulário de criação de link, listagem responsiva com spinner de carregamento, estado vazio, loading no envio e exclusão com confirmação
+- Página de redirecionamento (`pages/redirect-page.tsx`): busca o link pelo slug, incrementa acessos e redireciona para a URL original, com spinner durante o fetch; slug inválido ou inexistente exibe a página 404
 - Página 404 (`pages/not-found-page.tsx`): mensagem de link não encontrado, arte 404 e navegação de volta à home
 - Roteamento completo em `routes.tsx`: `/` (home), `/:shortUrl` (redirecionamento) e `*` (404 para rotas inexistentes)
 - Error boundary global (`components/error-boundary.tsx`) com fallback amigável e retorno à home
+- Acessibilidade e micro-interações: foco visível por teclado (`focus-visible`) e transições suaves nos controles interativos

@@ -4,6 +4,8 @@ import { useParams } from 'react-router-dom'
 import { getLinkBySlug } from '../api/get-link-by-slug'
 import { incrementAccess } from '../api/increment-access'
 import { Logo } from '../components/logo'
+import { Card } from '../components/ui/card'
+import { Spinner } from '../components/ui/spinner'
 import { NotFoundPage } from './not-found-page'
 
 const shortUrlRegex = /^[a-zA-Z0-9_-]{3,32}$/
@@ -56,25 +58,29 @@ export function RedirectPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-200 px-3 py-8">
-      <div
-        key={shortUrl}
-        className="flex w-full max-w-[580px] flex-col items-center gap-6 rounded-md bg-gray-100 px-5 py-12 md:px-12 md:py-16"
-      >
+      <Card key={shortUrl} variant="centered">
         <Logo variant="icon" className="size-12" />
+
+        {isLoading && <Spinner label="Buscando link" />}
 
         <h1 className="text-center text-body-xl text-gray-600">
           Redirecionando...
         </h1>
 
-        <div className="flex w-full flex-col items-center gap-1 text-center text-body-md text-gray-500">
-          <p>O link será aberto automaticamente em alguns instantes.</p>
+        <div
+          className="flex w-full flex-col items-center gap-1 text-center text-body-md text-gray-500"
+          aria-live="polite"
+        >
+          <p className="max-w-[326px] md:max-w-none">
+            O link será aberto automaticamente em alguns instantes.
+          </p>
           <p>
             Não foi redirecionado?{' '}
             {originalUrl && !isLoading ? (
               <a
                 href={originalUrl}
                 onClick={handleManualRedirect}
-                className="text-blue-base underline"
+                className="rounded-sm text-blue-base underline transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-base"
               >
                 Acesse aqui
               </a>
@@ -83,7 +89,7 @@ export function RedirectPage() {
             )}
           </p>
         </div>
-      </div>
+      </Card>
     </main>
   )
 }

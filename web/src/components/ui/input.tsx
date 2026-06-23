@@ -34,11 +34,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={id}
           className={cn(
-            'h-12 w-full rounded-md border px-4 text-body-md font-normal text-gray-600 outline-none transition-colors',
+            'h-12 w-full rounded-md border px-4 text-body-md font-normal text-gray-600 outline-none transition-colors duration-200 ease-in-out',
             'placeholder:text-gray-400',
             hasError
               ? 'border-[1.5px] border-danger'
-              : 'border border-gray-300 focus:border-[1.5px] focus:border-blue-base',
+              : 'border border-gray-300 focus-visible:border-[1.5px] focus-visible:border-blue-base',
             className,
           )}
           aria-invalid={hasError}
