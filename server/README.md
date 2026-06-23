@@ -28,6 +28,20 @@ npm run db:migrate
 | `npm run db:generate` | Gera migrations a partir do schema Drizzle |
 | `npm run db:migrate` | Aplica migrations pendentes no PostgreSQL |
 
+## Docker
+
+Build e execução em container (multi-stage, Node 20.18, usuário non-root). As migrations são aplicadas automaticamente no startup.
+
+```bash
+docker build -t brevly-server .
+docker run -p 3333:3333 \
+  -e DATABASE_URL=postgresql://user:password@host:5432/brevly \
+  -e CORS_ORIGIN=http://localhost:5173 \
+  brevly-server
+```
+
+Passe as variáveis de ambiente via `-e` ou `--env-file` (o `.env` local não entra na imagem).
+
 ## Variáveis de ambiente
 
 Copie `.env.example` para `.env` e preencha:
@@ -61,3 +75,4 @@ Respostas JSON usam o parser/serializer padrão do Fastify (`Content-Type: appli
 - Testes de integração da exportação CSV em `test/export.spec.ts`
 - Testes de CORS em `test/app.spec.ts`
 - ESLint flat config com regras strict type-checked
+- Container Docker com build multi-stage, entrypoint de migrations e execução como usuário non-root
