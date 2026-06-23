@@ -38,7 +38,11 @@ Copie `.env.example` para `.env` e preencha:
 - TailwindCSS (mobile-first), React Query, React Hook Form, Zod, React Router e Axios
 - Estrutura base: `api/`, `components/`, `lib/`, `pages/`
 - Validação de ambiente com Zod (`src/env.ts`)
-- Shell da aplicação com `QueryClientProvider` e rota placeholder
+- Shell da aplicação com `QueryClientProvider` e roteamento React Router
 - ESLint flat config alinhado ao backend
 - Camada de API: cliente Axios (`lib/axios.ts`), tipos compartilhados e funções HTTP para links (`api/`)
 - React Query configurado com defaults centralizados em `lib/query-client.ts`
+- Design system com tokens Tailwind, fontes Open Sans/Quicksand e componentes UI (`Button`, `Input`, `IconButton`, `Logo`)
+- Ícones via `@phosphor-icons/react`
+- Página inicial (`pages/home-page.tsx`): formulário de criação de link, listagem com estados de loading e vazio, e exclusão com confirmação
+- Rota `/` apontando para a home
