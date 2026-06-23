@@ -1,3 +1,3 @@
 export function Placeholder() {
-  return <p>Brev.ly</p>
+  return <p>Hello world from brev.ly</p>
 }
