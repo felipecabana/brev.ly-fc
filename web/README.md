@@ -45,4 +45,5 @@ Copie `.env.example` para `.env` e preencha:
 - Design system com tokens Tailwind, fontes Open Sans/Quicksand e componentes UI (`Button`, `Input`, `IconButton`, `Logo`)
 - Ícones via `@phosphor-icons/react`
 - Página inicial (`pages/home-page.tsx`): formulário de criação de link, listagem com estados de loading e vazio, e exclusão com confirmação
+- Página de redirecionamento (`pages/redirect-page.tsx`): busca o link pelo slug, incrementa acessos e redireciona para a URL original, com estado de carregamento e fallback para link inválido ou inexistente
 - Rota `/` apontando para a home
