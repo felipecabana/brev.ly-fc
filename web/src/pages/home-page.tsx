@@ -14,8 +14,10 @@ import { getLinks } from '../api/get-links'
 import type { Link } from '../api/types'
 import { Logo } from '../components/logo'
 import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
 import { IconButton } from '../components/ui/icon-button'
 import { Input } from '../components/ui/input'
+import { Spinner } from '../components/ui/spinner'
 import { env } from '../env'
 import { queryClient } from '../lib/query-client'
 
@@ -37,10 +39,6 @@ type CreateLinkForm = z.infer<typeof createLinkFormSchema>
 function formatShortUrl(shortUrl: string) {
   const { host } = new URL(env.VITE_FRONTEND_URL)
   return `${host}/${shortUrl}`
-}
-
-function formatCreatedAt(createdAt: string) {
-  return new Date(createdAt).toLocaleDateString('pt-BR')
 }
 
 function formatAccessCount(accessCount: number) {
@@ -107,7 +105,7 @@ export function HomePage() {
         <Logo className="h-6 w-auto self-center lg:self-start" />
 
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-5">
-          <section className="flex w-full flex-col rounded-md bg-gray-100 p-6 lg:w-[380px] lg:p-8">
+          <Card className="lg:w-[380px]">
             <form
               onSubmit={handleSubmit(handleCreateLink)}
               className="flex flex-col gap-6"
@@ -129,13 +127,13 @@ export function HomePage() {
                 />
               </div>
 
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" loading={isPending}>
                 Salvar link
               </Button>
             </form>
-          </section>
+          </Card>
 
-          <section className="flex w-full flex-col gap-5 rounded-md bg-gray-100 p-6 lg:max-w-[580px] lg:flex-1 lg:gap-5 lg:p-8">
+          <Card className="gap-5 lg:max-w-[580px] lg:flex-1 lg:gap-5">
             <header className="flex items-center justify-between gap-4">
               <h2 className="text-body-lg text-gray-600">Meus links</h2>
               <Button
@@ -153,9 +151,9 @@ export function HomePage() {
               <hr className="border-gray-300" />
 
               {isLoadingLinks && (
-                <p className="py-4 text-center text-body-sm text-gray-500">
-                  Carregando links...
-                </p>
+                <div className="flex justify-center py-8">
+                  <Spinner label="Carregando links" />
+                </div>
               )}
 
               {!isLoadingLinks && links.length === 0 && (
@@ -181,7 +179,7 @@ export function HomePage() {
                   </div>
                 ))}
             </div>
-          </section>
+          </Card>
         </div>
       </div>
     </main>
@@ -198,14 +196,13 @@ function LinkRow({
   isDeleting: boolean
 }) {
   return (
-    <div className="flex items-center gap-5 py-0.5">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <div className="flex items-center gap-3 py-0.5 lg:gap-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate text-body-md text-blue-base">
           {formatShortUrl(link.shortUrl)}
         </p>
-        <p className="truncate text-body-sm text-gray-500">{link.originalUrl}</p>
-        <p className="text-body-sm text-gray-500">
-          {formatCreatedAt(link.createdAt)}
+        <p className="truncate text-body-sm font-normal text-gray-500">
+          {link.originalUrl}
         </p>
       </div>
 
@@ -213,7 +210,7 @@ function LinkRow({
         {formatAccessCount(link.accessCount)}
       </p>
 
-      <div className="flex shrink-0 gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <IconButton aria-label="Copiar link" disabled>
           <CopyIcon size={16} />
         </IconButton>

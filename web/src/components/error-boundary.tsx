@@ -36,7 +36,10 @@ export class ErrorBoundary extends Component<
               Algo inesperado aconteceu. Tente voltar para a página inicial.
             </p>
 
-            <a href="/" className="w-full max-w-[280px]">
+            <a
+              href="/"
+              className="w-full max-w-[280px] rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-base"
+            >
               <Button type="button">Voltar para a home</Button>
             </a>
           </div>
