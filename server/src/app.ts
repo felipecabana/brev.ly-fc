@@ -3,6 +3,7 @@ import Fastify, { type FastifyError } from 'fastify'
 
 import { env } from './config/env.js'
 import { healthRoutes } from './routes/health.js'
+import { linksRoutes } from './routes/links.js'
 
 export async function buildApp() {
   const app = Fastify({
@@ -23,6 +24,7 @@ export async function buildApp() {
   })
 
   await app.register(healthRoutes)
+  await app.register(linksRoutes, { prefix: '/links' })
 
   return app
 }

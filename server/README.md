@@ -45,4 +45,5 @@ Copie `.env.example` para `.env` e preencha:
 - Schema Drizzle: tabelas `links` e `exports`, com migration inicial
 - Conexão PostgreSQL e verificação no startup
 - Rota de health check (`GET /health`)
+- Rotas de links (`/links`): criar (`POST /`), listar com paginação (`GET /`), buscar por slug (`GET /:shortUrl`) e excluir por id (`DELETE /:id`), com validação Zod e erros em pt-BR
 - ESLint flat config com regras strict type-checked
