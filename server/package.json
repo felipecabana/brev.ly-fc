@@ -10,6 +10,7 @@
     "start": "node --env-file=.env dist/main.js",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
+    "test": "node --env-file=.env node_modules/vitest/vitest.mjs run",
     "db:generate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs generate",
     "db:migrate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs migrate"
   },
@@ -26,10 +27,13 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@types/node": "^25.9.2",
+    "@types/supertest": "^6.0.3",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
+    "supertest": "^7.1.4",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0"
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^3.2.4"
   }
 }

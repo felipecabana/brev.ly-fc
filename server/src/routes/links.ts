@@ -1,5 +1,5 @@
 import type { FastifyPluginCallback } from 'fastify'
-import { count, desc, eq } from 'drizzle-orm'
+import { count, desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '../db/connection.js'
@@ -51,6 +51,36 @@ export const linksRoutes: FastifyPluginCallback = (app, _opts, done) => {
         .from(links)
         .where(eq(links.shortUrl, shortUrl))
         .limit(1)
+
+      if (!link) {
+        return await reply.status(404).send({ error: 'Link não encontrado.' })
+      }
+
+      return { link }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return reply.status(400).send({ error: 'Parâmetros de rota inválidos.' })
+      }
+
+      throw error
+    }
+  })
+
+  app.patch('/:id/access', async (request, reply) => {
+    const incrementAccessParamsSchema = z.object({
+      id: z.uuid(),
+    })
+
+    try {
+      const { id } = incrementAccessParamsSchema.parse(request.params)
+
+      const [link] = await db
+        .update(links)
+        .set({
+          accessCount: sql`${links.accessCount} + 1`,
+        })
+        .where(eq(links.id, id))
+        .returning()
 
       if (!link) {
         return await reply.status(404).send({ error: 'Link não encontrado.' })
