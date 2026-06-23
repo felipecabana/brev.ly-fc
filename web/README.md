@@ -22,6 +22,7 @@ npm install
 | `npm run preview` | Preview do build de produção |
 | `npm run lint` | ESLint (zero warnings) |
 | `npm run typecheck` | Verificação de tipos sem emitir arquivos |
+| `npm test` | Testes unitários (Vitest) |
 
 ## Variáveis de ambiente
 
@@ -50,3 +51,6 @@ Copie `.env.example` para `.env` e preencha:
 - Roteamento completo em `routes.tsx`: `/` (home), `/:shortUrl` (redirecionamento) e `*` (404 para rotas inexistentes)
 - Error boundary global (`components/error-boundary.tsx`) com fallback amigável e retorno à home
 - Acessibilidade e micro-interações: foco visível por teclado (`focus-visible`) e transições suaves nos controles interativos
+- Validação de links centralizada em `lib/link-validation.ts` (slug e URL alinhados ao backend), com validação em tempo real no formulário da home
+- Tratamento de erros de API em `lib/api-error.ts` e feedback inline na criação, exclusão e listagem de links; retry inteligente no React Query e distinção entre 404 e falhas de rede no redirecionamento
+- Testes unitários em `test/` para schemas de validação, mapeamento de erros e política de retry

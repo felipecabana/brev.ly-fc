@@ -4,10 +4,12 @@ import {
   DownloadSimpleIcon,
   LinkIcon,
   TrashIcon,
+  WarningIcon,
 } from '@phosphor-icons/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { createLink } from '../api/create-link'
 import { deleteLink } from '../api/delete-link'
 import { getLinks } from '../api/get-links'
@@ -19,22 +21,15 @@ import { IconButton } from '../components/ui/icon-button'
 import { Input } from '../components/ui/input'
 import { Spinner } from '../components/ui/spinner'
 import { env } from '../env'
-import { queryClient } from '../lib/query-client'
+import { getApiErrorMessage } from '../lib/api-error'
+import {
+  createLinkFormSchema,
+  type CreateLinkForm,
+} from '../lib/link-validation'
+import { queryClient, shouldRetryQuery } from '../lib/query-client'
 
 const pageIndex = 0
 const limit = 50
-
-const createLinkFormSchema = z.object({
-  originalUrl: z.url('Informe uma URL válida.'),
-  shortUrl: z
-    .string()
-    .regex(
-      /^[a-zA-Z0-9_-]{3,32}$/,
-      'Use entre 3 e 32 caracteres (letras, números, _ ou -).',
-    ),
-})
-
-type CreateLinkForm = z.infer<typeof createLinkFormSchema>
 
 function formatShortUrl(shortUrl: string) {
   const { host } = new URL(env.VITE_FRONTEND_URL)
@@ -46,22 +41,32 @@ function formatAccessCount(accessCount: number) {
 }
 
 export function HomePage() {
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    setError,
+    formState: { errors, isValid, isSubmitting },
   } = useForm<CreateLinkForm>({
     resolver: zodResolver(createLinkFormSchema),
+    mode: 'onChange',
     defaultValues: {
       originalUrl: '',
       shortUrl: '',
     },
   })
 
-  const { data: linksResult, isLoading: isLoadingLinks } = useQuery({
+  const {
+    data: linksResult,
+    isLoading: isLoadingLinks,
+    isError: isLinksError,
+    error: linksError,
+  } = useQuery({
     queryKey: ['links', pageIndex, limit],
     queryFn: () => getLinks({ pageIndex, limit }),
+    retry: shouldRetryQuery,
   })
 
   const links = linksResult?.links ?? []
@@ -85,8 +90,19 @@ export function HomePage() {
   })
 
   async function handleCreateLink(data: CreateLinkForm) {
-    await createLinkFn(data)
-    reset()
+    try {
+      await createLinkFn(data)
+      reset()
+    } catch (error) {
+      const message = getApiErrorMessage(error)
+
+      if (isAxiosError(error) && error.response?.status === 409) {
+        setError('shortUrl', { type: 'server', message })
+        return
+      }
+
+      setError('root', { type: 'server', message })
+    }
   }
 
   async function handleDeleteLink(link: Link) {
@@ -96,7 +112,12 @@ export function HomePage() {
 
     if (!confirmed) return
 
-    await deleteLinkFn({ id: link.id })
+    try {
+      setDeleteError(null)
+      await deleteLinkFn({ id: link.id })
+    } catch (error) {
+      setDeleteError(getApiErrorMessage(error))
+    }
   }
 
   return (
@@ -127,7 +148,15 @@ export function HomePage() {
                 />
               </div>
 
-              <Button type="submit" loading={isPending}>
+              {errors.root?.message && (
+                <FormAlert message={errors.root.message} />
+              )}
+
+              <Button
+                type="submit"
+                loading={isPending}
+                disabled={!isValid || isSubmitting}
+              >
                 Salvar link
               </Button>
             </form>
@@ -150,13 +179,21 @@ export function HomePage() {
             <div className="flex flex-col gap-4">
               <hr className="border-gray-300" />
 
+              {deleteError && <FormAlert message={deleteError} />}
+
               {isLoadingLinks && (
                 <div className="flex justify-center py-8">
                   <Spinner label="Carregando links" />
                 </div>
               )}
 
-              {!isLoadingLinks && links.length === 0 && (
+              {isLinksError && (
+                <div className="flex justify-center py-8">
+                  <FormAlert message={getApiErrorMessage(linksError)} />
+                </div>
+              )}
+
+              {!isLoadingLinks && !isLinksError && links.length === 0 && (
                 <div className="flex flex-col items-center gap-3 px-0 pb-6 pt-4">
                   <LinkIcon size={32} className="text-gray-500" aria-hidden />
                   <p className="max-w-[284px] text-center text-body-xs uppercase text-gray-500">
@@ -166,6 +203,7 @@ export function HomePage() {
               )}
 
               {!isLoadingLinks &&
+                !isLinksError &&
                 links.map((link, index) => (
                   <div key={link.id} className="flex flex-col gap-4">
                     {index > 0 && <hr className="border-gray-300" />}
@@ -183,6 +221,15 @@ export function HomePage() {
         </div>
       </div>
     </main>
+  )
+}
+
+function FormAlert({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-2" role="alert">
+      <WarningIcon size={16} className="shrink-0 text-danger" aria-hidden />
+      <span className="text-body-sm text-gray-500">{message}</span>
+    </div>
   )
 }
 
