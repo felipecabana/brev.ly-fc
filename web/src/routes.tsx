@@ -1,9 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { Placeholder } from './pages/placeholder'
+import { HomePage } from './pages/home-page'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Placeholder />,
+    element: <HomePage />,
   },
 ])
