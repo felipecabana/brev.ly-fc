@@ -10,6 +10,7 @@ import { Card } from '../components/ui/card'
 import { Spinner } from '../components/ui/spinner'
 import { getApiErrorMessage } from '../lib/api-error'
 import { isValidShortUrl } from '../lib/link-validation'
+import { queryClient } from '../lib/query-client'
 import { NotFoundPage } from './not-found-page'
 
 function isNotFoundError(error: unknown) {
@@ -50,6 +51,7 @@ export function RedirectPage() {
 
     incrementAccessFn({ id: link.id })
       .then(() => {
+        void queryClient.invalidateQueries({ queryKey: ['links'] })
         window.location.href = link.originalUrl
       })
       .catch((incrementFailure: unknown) => {
