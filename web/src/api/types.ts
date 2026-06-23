@@ -40,3 +40,8 @@ export interface DeleteLinkParams {
 export interface IncrementAccessParams {
   id: string
 }
+
+export interface ExportLinksResponse {
+  fileName: string
+  publicUrl: string
+}

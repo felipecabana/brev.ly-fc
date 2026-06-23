@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { createLink } from '../api/create-link'
 import { deleteLink } from '../api/delete-link'
+import { exportLinks } from '../api/export-links'
 import { getLinks } from '../api/get-links'
 import type { Link } from '../api/types'
 import { Logo } from '../components/logo'
@@ -42,6 +43,7 @@ function formatAccessCount(accessCount: number) {
 
 export function HomePage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [exportError, setExportError] = useState<string | null>(null)
 
   const {
     register,
@@ -89,6 +91,11 @@ export function HomePage() {
     },
   })
 
+  const { mutateAsync: exportLinksFn, isPending: isExportingLinks } =
+    useMutation({
+      mutationFn: exportLinks,
+    })
+
   async function handleCreateLink(data: CreateLinkForm) {
     try {
       await createLinkFn(data)
@@ -102,6 +109,16 @@ export function HomePage() {
       }
 
       setError('root', { type: 'server', message })
+    }
+  }
+
+  async function handleExportLinks() {
+    try {
+      setExportError(null)
+      const { publicUrl } = await exportLinksFn()
+      window.open(publicUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      setExportError(getApiErrorMessage(error))
     }
   }
 
@@ -168,9 +185,11 @@ export function HomePage() {
               <Button
                 type="button"
                 variant="secondary"
-                disabled
+                loading={isExportingLinks}
+                disabled={isExportingLinks}
                 className="shrink-0"
                 icon={<DownloadSimpleIcon size={16} />}
+                onClick={() => void handleExportLinks()}
               >
                 Baixar CSV
               </Button>
@@ -179,6 +198,7 @@ export function HomePage() {
             <div className="flex flex-col gap-4">
               <hr className="border-gray-300" />
 
+              {exportError && <FormAlert message={exportError} />}
               {deleteError && <FormAlert message={deleteError} />}
 
               {isLoadingLinks && (

@@ -23,6 +23,7 @@ npm install
 | `npm run lint` | ESLint (zero warnings) |
 | `npm run typecheck` | Verificação de tipos sem emitir arquivos |
 | `npm test` | Testes unitários (Vitest) |
+| `npm run test:e2e` | Testes E2E (Playwright — sobe API e frontend automaticamente) |
 
 ## Variáveis de ambiente
 
@@ -30,8 +31,12 @@ Copie `.env.example` para `.env` e preencha:
 
 | Variável | Descrição |
 |---|---|
-| `VITE_FRONTEND_URL` | URL pública do frontend |
-| `VITE_BACKEND_URL` | URL base da API |
+| `VITE_FRONTEND_URL` | URL pública do frontend (deve ser igual ao `CORS_ORIGIN` do backend) |
+| `VITE_BACKEND_URL` | URL base da API (sem sufixo `/links`) |
+
+## Testes E2E
+
+`npm run test:e2e` usa portas dedicadas (`5199` frontend, `3334` API) para não conflitar com o dev local. Requer PostgreSQL configurado em `server/.env`.
 
 ## Implementado
 
@@ -54,3 +59,7 @@ Copie `.env.example` para `.env` e preencha:
 - Validação de links centralizada em `lib/link-validation.ts` (slug e URL alinhados ao backend), com validação em tempo real no formulário da home
 - Tratamento de erros de API em `lib/api-error.ts` e feedback inline na criação, exclusão e listagem de links; retry inteligente no React Query e distinção entre 404 e falhas de rede no redirecionamento
 - Testes unitários em `test/` para schemas de validação, mapeamento de erros e política de retry
+- Exportação CSV na home (`api/export-links.ts`) com download via URL pública retornada pela API
+- Testes E2E com Playwright em `test/*.e2e-spec.ts` (fluxo feliz e cenários de erro)
+- Rotas com lazy loading e chunks de vendor separados no build de produção
+- Meta tags de SEO, favicon e `theme-color` em `index.html`
