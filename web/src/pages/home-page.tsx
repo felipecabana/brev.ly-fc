@@ -6,10 +6,11 @@ import {
   TrashIcon,
   WarningIcon,
 } from '@phosphor-icons/react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Link as RouterLink } from 'react-router-dom'
 import { createLink } from '../api/create-link'
 import { deleteLink } from '../api/delete-link'
 import { exportLinks } from '../api/export-links'
@@ -29,12 +30,24 @@ import {
 } from '../lib/link-validation'
 import { queryClient, shouldRetryQuery } from '../lib/query-client'
 
-const pageIndex = 0
-const limit = 50
+const limit = 10
+
+function buildShortLinkUrl(shortUrl: string) {
+  return new URL(shortUrl, env.VITE_FRONTEND_URL).href
+}
+
+function getShortLinkDisplayHost() {
+  const { hostname } = new URL(env.VITE_FRONTEND_URL)
+
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'brev.ly'
+  }
+
+  return hostname
+}
 
 function formatShortUrl(shortUrl: string) {
-  const { host } = new URL(env.VITE_FRONTEND_URL)
-  return `${host}/${shortUrl}`
+  return `${getShortLinkDisplayHost()}/${shortUrl}`
 }
 
 function formatAccessCount(accessCount: number) {
@@ -42,6 +55,7 @@ function formatAccessCount(accessCount: number) {
 }
 
 export function HomePage() {
+  const [pageIndex, setPageIndex] = useState(0)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
 
@@ -63,19 +77,26 @@ export function HomePage() {
   const {
     data: linksResult,
     isLoading: isLoadingLinks,
+    isFetching: isFetchingLinks,
     isError: isLinksError,
     error: linksError,
   } = useQuery({
     queryKey: ['links', pageIndex, limit],
     queryFn: () => getLinks({ pageIndex, limit }),
     retry: shouldRetryQuery,
+    refetchOnWindowFocus: 'always',
+    placeholderData: keepPreviousData,
   })
 
   const links = linksResult?.links ?? []
+  const totalCount = linksResult?.meta.totalCount ?? 0
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit))
+  const showPagination = totalCount > limit
 
   const { mutateAsync: createLinkFn, isPending } = useMutation({
     mutationFn: createLink,
     onSuccess() {
+      setPageIndex(0)
       queryClient.invalidateQueries({ queryKey: ['links'] })
     },
   })
@@ -129,9 +150,15 @@ export function HomePage() {
 
     if (!confirmed) return
 
+    const wasLastItemOnPage = links.length === 1 && pageIndex > 0
+
     try {
       setDeleteError(null)
       await deleteLinkFn({ id: link.id })
+
+      if (wasLastItemOnPage) {
+        setPageIndex((current) => current - 1)
+      }
     } catch (error) {
       setDeleteError(getApiErrorMessage(error))
     }
@@ -213,7 +240,7 @@ export function HomePage() {
                 </div>
               )}
 
-              {!isLoadingLinks && !isLinksError && links.length === 0 && (
+              {!isLoadingLinks && !isLinksError && totalCount === 0 && (
                 <div className="flex flex-col items-center gap-3 px-0 pb-6 pt-4">
                   <LinkIcon size={32} className="text-gray-500" aria-hidden />
                   <p className="max-w-[284px] text-center text-body-xs uppercase text-gray-500">
@@ -236,6 +263,35 @@ export function HomePage() {
                     />
                   </div>
                 ))}
+
+              {showPagination && !isLinksError && (
+                <nav
+                  className="flex items-center justify-between gap-3 border-t border-gray-300 pt-4"
+                  aria-label="Paginação de links"
+                >
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={pageIndex === 0 || isFetchingLinks}
+                    onClick={() => setPageIndex((current) => current - 1)}
+                  >
+                    Anterior
+                  </Button>
+
+                  <p className="text-body-sm text-gray-500">
+                    Página {pageIndex + 1} de {totalPages}
+                  </p>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={pageIndex >= totalPages - 1 || isFetchingLinks}
+                    onClick={() => setPageIndex((current) => current + 1)}
+                  >
+                    Próxima
+                  </Button>
+                </nav>
+              )}
             </div>
           </Card>
         </div>
@@ -262,12 +318,23 @@ function LinkRow({
   onDelete: (link: Link) => void
   isDeleting: boolean
 }) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(buildShortLinkUrl(link.shortUrl))
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="flex items-center gap-3 py-0.5 lg:gap-5">
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p className="truncate text-body-md text-blue-base">
+        <RouterLink
+          to={`/${link.shortUrl}`}
+          className="truncate text-body-md text-blue-base transition-colors duration-200 ease-in-out hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-base"
+        >
           {formatShortUrl(link.shortUrl)}
-        </p>
+        </RouterLink>
         <p className="truncate text-body-sm font-normal text-gray-500">
           {link.originalUrl}
         </p>
@@ -278,7 +345,10 @@ function LinkRow({
       </p>
 
       <div className="flex shrink-0 items-center gap-1">
-        <IconButton aria-label="Copiar link" disabled>
+        <IconButton
+          aria-label={copied ? 'Link copiado' : 'Copiar link'}
+          onClick={() => void handleCopy()}
+        >
           <CopyIcon size={16} />
         </IconButton>
         <IconButton

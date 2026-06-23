@@ -6,6 +6,7 @@ Encurtador de URLs — monorepo com backend API e frontend SPA.
 
 - Integração frontend + backend validada com testes E2E (fluxo feliz e cenários de erro)
 - Exportação CSV habilitada na home, com build de produção otimizado (lazy loading e chunks separados)
+- Home com listagem paginada, cópia do link encurtado, slug clicável para redirecionamento e contador de acessos atualizado após visita
 - Meta tags, favicon e documentação de variáveis de ambiente para deploy
 - Checklist de deployment validado ([DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md))
 
