@@ -54,7 +54,10 @@ Respostas JSON usam o parser/serializer padrão do Fastify (`Content-Type: appli
 - Schema Drizzle: tabelas `links` e `exports`, com migration inicial
 - Conexão PostgreSQL e verificação no startup
 - Rota de health check (`GET /health`)
-- Rotas de links (`/links`): criar (`POST /`), listar com paginação (`GET /`), buscar por slug (`GET /:shortUrl`), incrementar acessos (`PATCH /:id/access`) e excluir por id (`DELETE /:id`), com validação Zod e erros em pt-BR
+- Rotas de links (`/links`): criar (`POST /`), listar com paginação (`GET /`), buscar por slug (`GET /:shortUrl`), incrementar acessos (`PATCH /:id/access`), excluir por id (`DELETE /:id`) e exportar CSV (`POST /export`), com validação Zod e erros em pt-BR
+- Exportação CSV: gera relatório com todos os links (`originalUrl`, `shortUrl`, `accessCount`, `createdAt`), envia para Cloudflare R2 e retorna `{ fileName, publicUrl }`
+- Serviço de exportação em `src/services/export.ts` (geração de CSV + upload S3-compatível)
 - Testes de integração das rotas de links em `test/links.spec.ts`
+- Testes de integração da exportação CSV em `test/export.spec.ts`
 - Testes de CORS em `test/app.spec.ts`
 - ESLint flat config com regras strict type-checked

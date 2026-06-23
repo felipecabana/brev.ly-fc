@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.js'
 import { closeDatabase, db } from '../src/db/connection.js'
 import { links } from '../src/db/schema.js'
+import { createLink } from './helpers.js'
 
 describe('Links routes', () => {
   let app: FastifyInstance
@@ -23,19 +24,6 @@ describe('Links routes', () => {
   beforeEach(async () => {
     await db.delete(links).where(isNotNull(links.id))
   })
-
-  async function createLink(shortUrl: string) {
-    const response = await request(app.server)
-      .post('/links')
-      .send({
-        originalUrl: `https://example.com/${shortUrl}`,
-        shortUrl,
-      })
-
-    expect(response.status).toBe(201)
-
-    return response.body.link
-  }
 
   it('deve criar um link', async () => {
     const response = await request(app.server)
@@ -68,7 +56,7 @@ describe('Links routes', () => {
   })
 
   it('deve rejeitar slug duplicado', async () => {
-    await createLink('duplicate')
+    await createLink(app, 'duplicate')
 
     const response = await request(app.server)
       .post('/links')
@@ -82,9 +70,9 @@ describe('Links routes', () => {
   })
 
   it('deve listar links com paginação', async () => {
-    await createLink('page-1')
-    await createLink('page-2')
-    await createLink('page-3')
+    await createLink(app, 'page-1')
+    await createLink(app, 'page-2')
+    await createLink(app, 'page-3')
 
     const firstPage = await request(app.server)
       .get('/links')
@@ -108,7 +96,7 @@ describe('Links routes', () => {
   })
 
   it('deve retornar página vazia quando o offset passa do total', async () => {
-    await createLink('only-one')
+    await createLink(app, 'only-one')
 
     const response = await request(app.server)
       .get('/links')
@@ -120,7 +108,7 @@ describe('Links routes', () => {
   })
 
   it('deve buscar link pelo slug', async () => {
-    await createLink('find-me')
+    await createLink(app, 'find-me')
 
     const response = await request(app.server).get('/links/find-me')
 
@@ -136,7 +124,7 @@ describe('Links routes', () => {
   })
 
   it('deve excluir um link existente', async () => {
-    const link = await createLink('to-delete')
+    const link = await createLink(app, 'to-delete')
 
     const deleteResponse = await request(app.server).delete(`/links/${link.id}`)
 
@@ -164,7 +152,7 @@ describe('Links routes', () => {
   })
 
   it('deve incrementar o contador de acessos', async () => {
-    const link = await createLink('track-access')
+    const link = await createLink(app, 'track-access')
 
     const response = await request(app.server).patch(`/links/${link.id}/access`)
 
@@ -173,7 +161,7 @@ describe('Links routes', () => {
   })
 
   it('deve incrementar o contador de acessos em paralelo', async () => {
-    const link = await createLink('concurrent')
+    const link = await createLink(app, 'concurrent')
 
     const responses = await Promise.all(
       Array.from({ length: 10 }, () =>

@@ -4,6 +4,13 @@ import { z } from 'zod'
 
 import { db } from '../db/connection.js'
 import { links } from '../db/schema.js'
+import {
+  CdnNotConfiguredError,
+  createExportFileName,
+  fetchAllLinks,
+  generateCsv,
+  uploadCsv,
+} from '../services/export.js'
 
 export const linksRoutes: FastifyPluginCallback = (app, _opts, done) => {
   app.get('/', async (request, reply) => {
@@ -35,6 +42,23 @@ export const linksRoutes: FastifyPluginCallback = (app, _opts, done) => {
       }
 
       throw error
+    }
+  })
+
+  app.post('/export', async (_request, reply) => {
+    const linkRows = await fetchAllLinks()
+    const csvContent = generateCsv(linkRows)
+    const fileName = createExportFileName()
+
+    try {
+      const result = await uploadCsv({ csvContent, fileName })
+      return await reply.status(201).send(result)
+    } catch (error) {
+      if (error instanceof CdnNotConfiguredError) {
+        return reply.status(500).send({ error: error.message })
+      }
+
+      return reply.status(500).send({ error: 'Falha ao publicar CSV na CDN.' })
     }
   })
 
@@ -143,7 +167,11 @@ export const linksRoutes: FastifyPluginCallback = (app, _opts, done) => {
         return reply.status(400).send({ error: 'Corpo da requisição inválido.' })
       }
 
-      if ((error as { code?: string }).code === '23505') {
+      const pgCode =
+        (error as { code?: string }).code ??
+        (error as { cause?: { code?: string } }).cause?.code
+
+      if (pgCode === '23505') {
         return reply.status(409).send({ error: 'URL encurtada já está em uso.' })
       }
 
