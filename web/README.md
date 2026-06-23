@@ -40,3 +40,5 @@ Copie `.env.example` para `.env` e preencha:
 - Validação de ambiente com Zod (`src/env.ts`)
 - Shell da aplicação com `QueryClientProvider` e rota placeholder
 - ESLint flat config alinhado ao backend
+- Camada de API: cliente Axios (`lib/axios.ts`), tipos compartilhados e funções HTTP para links (`api/`)
+- React Query configurado com defaults centralizados em `lib/query-client.ts`
