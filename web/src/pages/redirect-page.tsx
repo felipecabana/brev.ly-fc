@@ -1,28 +1,12 @@
 import { useEffect, useRef, type MouseEvent } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { getLinkBySlug } from '../api/get-link-by-slug'
 import { incrementAccess } from '../api/increment-access'
 import { Logo } from '../components/logo'
+import { NotFoundPage } from './not-found-page'
 
 const shortUrlRegex = /^[a-zA-Z0-9_-]{3,32}$/
-
-function LinkNotFoundFallback() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-200 px-3 py-8">
-      <div className="flex w-full max-w-[580px] flex-col items-center gap-4 rounded-md bg-gray-100 px-5 py-12 text-center md:px-12 md:py-16">
-        <h1 className="text-body-xl text-gray-600">Link não encontrado</h1>
-        <p className="text-body-md text-gray-500">
-          O link que você está tentando acessar não existe, foi removido ou é uma
-          URL inválida.
-        </p>
-        <Link to="/" className="text-body-md text-blue-base underline">
-          Voltar para a home
-        </Link>
-      </div>
-    </main>
-  )
-}
 
 export function RedirectPage() {
   const { shortUrl = '' } = useParams<{ shortUrl: string }>()
@@ -67,7 +51,7 @@ export function RedirectPage() {
   }
 
   if (showNotFound) {
-    return <LinkNotFoundFallback />
+    return <NotFoundPage />
   }
 
   return (
